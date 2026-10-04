@@ -1,4 +1,4 @@
-package boardlayer;
+package boardlayer;  
 
 public class Position {
 	
