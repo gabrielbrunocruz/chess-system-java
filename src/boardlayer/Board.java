@@ -60,5 +60,18 @@ public class Board {
 	public boolean thereIsAPiece(Position position) {
 		return piece(position) != null;
 	}
+	
+	public Piece removePiece(Position position) {
+		if(!positionExists(position)) {
+			throw new BoardException("Nao existe peca na posicao informada");
+		}
+		if(!thereIsAPiece(position)) {
+			return null;
+		}
+		Piece aux = piece(position);
+		aux.position = null;
+		pieces[position.getRow()][position.getColumn()]=null;
+		return aux;
+	}
 
 }
