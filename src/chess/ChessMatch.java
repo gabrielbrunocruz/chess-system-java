@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import boardlayer.Board;
 import boardlayer.Piece;
 import boardlayer.Position;
@@ -9,11 +12,35 @@ import chess.pieces.Rook;
 public class ChessMatch {
 
 	private Board board;
+	
+	private int turn;
+	
+	private Color currentPlayer;
+	
+	private List<Piece> piecesOnTheBoard = new ArrayList<>();
+	
+	private List<Piece> capturedPieces = new ArrayList<>();
+
 
 	public ChessMatch() {
 		board = new Board(8, 8); // quem precisa saber as dimensoes do tabuleiro e a classe ChessMatch
+		turn = 1;
+		currentPlayer = Color.WHITE;
 		initialSetup();
 	}
+	
+	
+
+	public int getTurn() {
+		return turn;
+	}
+
+
+	public Color getCurrentPlayer() {
+		return currentPlayer;
+	}
+
+
 
 	public ChessPiece[][] getPieces() {
 		ChessPiece[][] mat = new ChessPiece[board.getRows()][board.getColumns()];
@@ -25,8 +52,14 @@ public class ChessMatch {
 		return mat;
 	}
 	
+	private void nextTurn() {
+		turn++;
+		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;
+	}
+	
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
 		board.placePiece(piece, new ChessPosition(column,row).toPosition());
+		piecesOnTheBoard.add(piece);
 	}
 	
 	public boolean[][]possibleMoves(ChessPosition sourcePosition){
@@ -40,12 +73,16 @@ public class ChessMatch {
 		validateSourcePosition(source);
 		validadeTargetPosition(source, target);
 		Piece capturedPiece = makeMove(source, target);
+		nextTurn();
 		return (ChessPiece)capturedPiece;
 	
 	}
 	private void validateSourcePosition(Position position) {
 		if(!board.thereIsAPiece(position)) {
 			throw new ChessException("There is no piece on source position");
+		}
+		if(currentPlayer != ((ChessPiece)board.piece(position)).getColor()) {
+			throw new ChessException("The chosen piece is not yours");
 		}
 		if(!board.piece(position).isThereAnyPossibleMove()) {
 			throw new ChessException("There is no possible moves for the chosen piece");
@@ -62,6 +99,10 @@ public class ChessMatch {
 		Piece p = board.removePiece(source);
 		Piece captured = board.removePiece(target);//removendo uma possivel peca da posicao destino
 		board.placePiece(p, target);
+		if(captured != null) {
+			piecesOnTheBoard.remove(captured);
+			capturedPieces.add(captured);
+		}
 		return captured;
 	}
 	private void initialSetup() {
